@@ -6,11 +6,29 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 const { mapDBToModel } = require('../../utils');
 
 class NotesService {
-  constructor() {
+  constructor(collaborationService) {
     this._pool = new Pool();
+    this._collaborationService = collaborationService;
   }
 
-  async addNote({ title, body, tags, owner }) {
+  async verifyNoteAccess(noteId, userId) {
+    try {
+      await this.verifyNoteOwner(noteId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      try {
+        await this._collaborationService.verifyCollaborator(noteId, userId);
+      } catch {
+        throw error;
+      }
+    }
+  }
+
+  async addNote({
+    title, body, tags, owner,
+  }) {
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
@@ -31,7 +49,10 @@ class NotesService {
 
   async getNotes(owner) {
     const query = {
-      text: 'SELECT * FROM notes WHERE owner = $1',
+      text: `SELECT notes.* FROM notes
+      LEFT JOIN collaborations ON collaborations.note_id = notes.id
+      WHERE notes.owner = $1 OR collaborations.user_id = $1
+      GROUP BY notes.id`,
       values: [owner],
     };
     const result = await this._pool.query(query);
@@ -40,7 +61,10 @@ class NotesService {
 
   async getNoteById(id) {
     const query = {
-      text: 'SELECT * FROM notes WHERE id = $1',
+      text: `SELECT notes.*, users.username
+      FROM notes
+      LEFT JOIN users ON users.id = notes.owner
+      WHERE notes.id = $1`,
       values: [id],
     };
     const result = await this._pool.query(query);
