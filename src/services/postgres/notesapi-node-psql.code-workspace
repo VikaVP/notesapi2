@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "../../../../notesapi-node-psql"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../tokosync-fe"
+		},
+		{
+			"path": "../../../../Erafos"
+		},
+		{
+			"path": "../../../../open-music-backend"
+		},
+		{
+			"path": "../../../../dicoding-notes-app-api"
+		},
+		{
+			"path": "../../../../notes-api"
+		},
+		{
+			"path": "../../../../openmusic-Vika Vitaloka Pramansah"
+		},
+		{
+			"path": "../../../../basic-rabbitmq"
+		}
+	],
+	"settings": {}
+}
